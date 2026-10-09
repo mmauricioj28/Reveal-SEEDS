@@ -29,6 +29,16 @@ selected_columns = [
     "SAFETY_RATING_DATE"
 ]
 
+missing_columns = [
+    col for col in selected_columns
+    if col not in df_sample.columns
+]
+
+if missing_columns:
+    raise ValueError(
+        f"Required columns missing from dataset: {missing_columns}"
+    )
+
 print("\nSelected variables:")
 print(df_sample[selected_columns].head(10))
 
@@ -49,3 +59,46 @@ print(df_sample["SAFETY_RATING"].value_counts(dropna=False))
 
 print("\nPhysical state values:")
 print(df_sample["PHY_STATE"].value_counts(dropna=False))
+
+#10/9 - Extended exploration of first 10,000 census records
+import pandas as pd
+
+safety_columns = [
+    "DOT_NUMBER",
+    "PHY_STATE",
+    "CARRIER_OPERATION",
+    "FLEETSIZE",
+    "SAFETY_RATING",
+    "RECORDABLE_CRASH_RATE",
+    "REVIEW_DATE",
+    "SAFETY_RATING_DATE"
+]
+
+df_large = pd.read_csv(
+    file_path,
+    usecols=lambda column: column in safety_columns,
+    nrows=10000,
+    low_memory=False
+)
+
+print("/n Extended MCMIS Exploration")
+print("Rows analyzed:", len(df_large))
+
+print("\nColumns available:")
+print(df_large.columns.tolist())
+
+missing_summary = pd.DataFrame({
+    "Missing Count": df_large.isna().sum(),
+    "Missing %": (df_large.isna().mean() * 100).round(2)
+}).sort_values("Missing %", ascending=False)
+
+print("\nMissing-data summary:")
+print(missing_summary)
+
+for column in ["SAFETY_RATING", "CARRIER_OPERATION", "FLEETSIZE"]:
+    if column in df_large.columns:
+        print(f"\n{column} distribution:")
+        print(df_large[column].value_counts(dropna=False))
+
+missing_summary.to_csv("analysis/mcmis_safety_missingness.csv")
+print("\nSaved analysis/mcmis_safety_missingness.csv")

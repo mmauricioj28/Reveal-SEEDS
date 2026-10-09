@@ -1,0 +1,10 @@
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Raw datasets
+*.csv
+
+# Generated analysis reports
+analysis/outputs/
