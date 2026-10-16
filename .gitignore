@@ -4,3 +4,7 @@ __pycache__/
 outputs/
 .mcmis-*/
 data/
+.fmcsa-*/
+data/
+*.parquet
+FMCSA_data_raw/
