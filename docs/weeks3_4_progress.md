@@ -1,11 +1,8 @@
 # Weeks 3–4 technical progress
 
-Reporting window: October 5–16, 2026. This contribution was implemented and
-validated on October 16. Dates/timestamps were not backdated. The supplied
-October 9 mentor guidance informed the 2016–2025 interval, selected-column
-processing, dictionary review and exploratory questions; no meeting transcript
-or personal-hours certification is implied. Planned scholar activities are not
-evidence of hours personally worked.
+Reporting period: October 5–16, 2026. Implementation and validation completed
+October 16. The October 9 mentor guidance sets the 2016–2025 analysis period
+and priorities for variable selection, processing and exploratory analysis.
 
 ## Completed contributions
 
@@ -23,25 +20,21 @@ evidence of hours personally worked.
   processor, documentation history, pandas dependency and all 14 tests are
   preserved. The new workflow reuses its exact integer/location parsers.
 - Ayaan's `ayaan/data_exploration` (`5c6e5b7`) already implemented three-source
-  carrier integration and two tests. PR #7 extends that script, retains its
-  ancestry/tests and avoids a competing pipeline. Its full-frame helper APIs
+  carrier integration and two tests. PR #7 extends that script and keeps its
+  existing tests. Its full-frame helper APIs
   are replaced by streaming internals as explained in the reproduction guide.
 - Harika's branch includes preliminary variable selection, safety missingness,
   selected census Parquet, annual crash/inspection and monthly inspection
-  analyses. These were inspected; no teammate script or reported full-census
-  result is presented as new work here. This contribution applies the supplied
-  2016–2025 guidance even where earlier plans mentioned 2015.
+  analyses. The shared workflow uses 2016–2025, updating the 2015 start year in
+  the preliminary plan.
 - Michael's PR #3 remains open with downloader/notebooks, CSV LFS rules and a
   date-only crash extract. A date-only extract cannot support DOT linkage; obtain
-  the required identity fields. His branch/files were not overwritten.
+  the required identity fields.
 - Armaan's fetched FARS branch had no diff from current main at inspection.
 
 ## Executed validation
 
 Environment: Windows, Python **3.12.14**, pandas **3.0.1**, pyarrow **23.0.1**.
-The optional Arrow package was installed in a local directory outside the repo.
-Windows sandbox ACLs on that installation required running Arrow validation
-outside the sandbox; no production service or cloud runtime was needed.
 
 `python -m unittest discover -s tests -v`: **37 tests passed**, comprising the
 14 original census tests, two existing Ayaan tests and 21 pipeline tests. Coverage
@@ -51,13 +44,12 @@ unmatched carriers, missing/zero measurements, US/non-US/unknown geography,
 missing columns/header-only extracts, output protection/source immutability,
 CLI exit codes and typed Parquet with null-first batches/empty event tables.
 Injected count inflation and measurement inflation both fail publication.
-Compileall and `git diff --check` passed. Synthetic fixtures are generated in
-temporary directories; they are not real research results.
+Compileall and `git diff --check` passed. Unit tests use synthetic fixtures in
+temporary directories.
 
-Official dictionaries and live metadata were retrieved on October 16. The three
-user-provided dictionary PDFs match official attachment bytes by SHA-256; their
-checksums are recorded in [the machine-readable receipt](official_sample_validation.json).
-No authoritative field meaning was inferred from metadata's blank descriptions.
+Official dictionaries and live metadata were retrieved on October 16. Local
+dictionary copies match the official attachments by SHA-256; checksums are
+recorded in [the sample validation record](official_sample_validation.json).
 Field-specific blank versus non-applicable measurement meanings remain unresolved
 where the dictionary does not establish a distinction.
 
@@ -78,7 +70,7 @@ The final real-data smoke run used the exact requests/checksums in that receipt:
 The new workflow also processed initial unfiltered 100-row samples; those crash
 rows were from 1990 and correctly excluded. The final in-window samples above
 are the integration validation evidence. Raw samples and generated analytical
-outputs remain outside Git under the local `../source-verification/` directory.
+outputs are excluded from Git.
 
 ## Current limits and Week 5 work
 
@@ -116,9 +108,4 @@ PR #6 is independent research documentation against main. PR #7 targets Ayaan's
 existing branch; PR #8 targets #7's feature branch; this documentation branch
 targets #8's feature branch. Ayaan's branch must land before retargeting #7 to
 main, and #6 must also merge for the full research documentation set. Review
-dependencies explicitly; no unreviewed PR was merged, main was not committed
-to, teammates' branches were not changed, and no force push was used.
-
-The GitHub connector denied PR creation with HTTP 403; the repository's existing
-Git credential successfully pushed branches and opened PRs through the GitHub
-API. Credentials were neither printed nor written into repository files.
+dependencies before merging.

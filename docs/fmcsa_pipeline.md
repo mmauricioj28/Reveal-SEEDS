@@ -13,7 +13,7 @@ The metadata endpoints `/api/views/{id}.json` supply `columns[].fieldName`,
 `dataTypeName` and `metadata.attachments`; construct dictionary URLs using
 `/api/views/{id}/files/{assetId}?download=true`. The reviewed dictionaries are
 Company Census Rev08 (2026-01-23), Crash Rev05 (2025-11-04) and Inspection Rev05
-(2025-10-15). Their copies provided by the user matched the live attachments.
+(2025-10-15). Local copies match the official attachments by SHA-256.
 
 Small API samples can be acquired using these resource URLs and query parameters:
 
@@ -29,8 +29,8 @@ positive DOT identifiers from both event samples. Exact requests/checksums are
 in [the sample receipt](official_sample_validation.json). Ordered samples are
 nonrepresentative; targeted census matching makes sample linkage coverage
 artificially high. Live endpoints may revise records, so new hashes can differ.
-Michael's downloader remains on his branch; this contribution adds no competing
-bulk downloader. A full export needs complete portal export or validated API
+Michael's downloader is on his exploration branch. A full export needs a
+complete portal export or validated API
 pagination, not just increasing `$limit` and assuming the server honored it.
 
 Required headers after trim/uppercase:
@@ -105,8 +105,8 @@ Missing source counts for an existing DOT/year key become 0, but measurement
 sums remain null. Census TOTAL_DRIVERS is not an event metric and is never
 zero-filled. Crash sums can repeat accident casualties across vehicle records.
 
-Census-only carriers remain in `carriers`, without ten fabricated historical
-carrier/year rows. Use that table for population/fleet distributions. Carrier/year
+Census-only carriers remain in `carriers`; historical carrier/year rows are not
+added for them. Use that table for population/fleet distributions. Carrier/year
 outputs support observed-event comparisons, not a balanced historical panel.
 For crash monthly rows `event_state` is STATE; inspection uses REPORT_STATE,
 which is the uploading jurisdiction, usually where inspection occurred. No
@@ -148,5 +148,4 @@ policy, valid registration, absence of selection bias or comparable exposure.
 Research documentation is PR #6 against main. Preprocessing PR #7 extends
 Ayaan's existing branch, quality PR #8 builds on #7, and reproducibility docs
 build on #8. Review/merge the teammate dependency first, then retarget stacked
-PRs as appropriate; merge #6 for the full research documentation set. No main
-branch commits, force pushes or automatic PR merges are part of this work.
+PRs as appropriate; merge #6 for the full research documentation set.

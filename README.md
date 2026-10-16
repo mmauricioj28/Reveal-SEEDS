@@ -69,8 +69,7 @@ The research documents are contributed independently in [PR #6](https://github.c
 merge that PR as well as the engineering stack for the complete documentation set.
 The engineering stack begins at Ayaan's `ayaan/data_exploration` branch; its
 commit ancestry and existing tests are preserved. Harika's variable selection,
-Parquet and annual/monthly exploration scripts remain on her branch; this work
-does not claim those earlier results as new contributions.
+Parquet and annual/monthly exploration scripts are on her branch.
 
 Current validation is controlled synthetic fixtures and official API smoke
 samples, not complete national extracts. Crash counts are vehicle-involvement
