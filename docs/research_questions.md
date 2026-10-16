@@ -1,10 +1,8 @@
 # Weeks 3–4 analytical plan
 
-Period: **2016–2025 inclusive** for safety records. The October 9 mentor guidance
-supplied for this task sets the period and priorities; this is not a meeting
-transcript. These questions extend Harika's preliminary variable selection and
-annual/monthly exploration, and Ayaan's carrier integration work. No findings or
-hours personally worked are inferred from this plan.
+Period: **2016–2025 inclusive** for safety records, following the October 9 mentor
+guidance. These questions build on Harika's variable selection and annual/monthly
+exploration, and Ayaan's carrier integration work.
 
 ## 1. How does the registered carrier population differ across states?
 
