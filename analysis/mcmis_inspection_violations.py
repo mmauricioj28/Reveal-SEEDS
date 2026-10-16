@@ -66,3 +66,8 @@ OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 summary.to_csv(OUTPUT, index=False)
 
 print(f"\nSaved summary to: {OUTPUT}")
+
+
+# Check which inspection dates our sample covers
+print("\nEarliest sample date:", df["insp_date"].min())
+print("Latest sample date:", df["insp_date"].max())
