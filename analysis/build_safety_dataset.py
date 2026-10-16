@@ -12,6 +12,7 @@ import tempfile
 
 import pandas as pd
 from analysis.mcmis_chunked import hashed_lines, integer_values, location_codes, location_group
+from analysis.data_quality import validate_integration
 
 DATA_DIR = Path('data')
 OUTPUT_DIR = Path('outputs')
@@ -34,6 +35,8 @@ METRICS = {'crash': {'FATALITIES': 'TOTAL_FATALITIES', 'INJURIES': 'TOTAL_INJURI
            'inspection': {'VIOL_TOTAL': 'TOTAL_VIOLATIONS', 'OOS_TOTAL': 'TOTAL_OOS',
                           'VEHICLE_OOS_TOTAL': 'TOTAL_VEHICLE_OOS', 'DRIVER_OOS_TOTAL': 'TOTAL_DRIVER_OOS'}}
 EVENT_COUNTS = {'crash': 'TOTAL_CRASHES', 'inspection': 'TOTAL_INSPECTIONS'}
+CODE_DOMAINS = {'CARRIER_OPERATION': {'A', 'B', 'C'}, 'STATUS_CODE': {'A', 'I', 'P'},
+                'SAFETY_RATING': {'S', 'C', 'U'}, 'INSP_LEVEL_ID': {'1', '2', '3', '4', '5', '99'}}
 
 
 def get_filepath(filename_stem):
@@ -135,6 +138,11 @@ def ingest(database, kind, path, chunk_size):
                     missing = text.eq('') | text.isin(['N/A', 'NULL', 'NAN'])
                     clean[name] = text.mask(missing)
                     quality[name].update(missing=int(missing.sum()))
+                    allowed = CODE_DOMAINS.get(name)
+                    if name == 'CI_STATUS_CODE':
+                        allowed = set('UTCDNHIPX' if kind == 'inspection' else 'CHINPTU')
+                    if allowed is not None:
+                        quality[name].update(invalid=int((~missing & ~text.isin(allowed)).sum()))
             if kind == 'census':
                 clean['LOCATION_GROUP'] = [location_group(c or 'missing', s or 'missing')
                                            for c, s in zip(clean['PHY_COUNTRY'], clean['PHY_STATE'])]
@@ -259,6 +267,7 @@ def build_pipeline(census_path=None, crash_path=None, inspection_path=None, outp
             for kind in METRICS:
                 aggregate(database, kind)
             integrate(database)
+            reconciliation = validate_integration(database, quality, METRICS)
             for table, filename, order in (('census', 'carriers', 'DOT_NUMBER'),
                                             ('crash_year', 'crash_carrier_year', 'DOT_NUMBER,YEAR'),
                                             ('inspection_year', 'inspection_carrier_year', 'DOT_NUMBER,YEAR'),
@@ -266,6 +275,7 @@ def build_pipeline(census_path=None, crash_path=None, inspection_path=None, outp
                                             ('monthly', 'monthly_activity', 'source,YEAR,MONTH,event_state,REPORT_STATE')):
                 export_query(database, f'SELECT * FROM {table} ORDER BY {order}', stage / (filename + '.csv'), chunk_size, parquet)
             (stage / 'quality.json').write_text(json.dumps(quality, indent=2) + '\n', encoding='utf-8')
+            (stage / 'integration_validation.json').write_text(json.dumps(reconciliation, indent=2) + '\n', encoding='utf-8')
         for kind, path in paths.items():
             if original_stats[kind] != (path.stat().st_size, path.stat().st_mtime_ns):
                 raise ValueError(f'Input changed during processing: {path}')
