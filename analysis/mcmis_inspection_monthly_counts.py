@@ -46,6 +46,15 @@ df = pd.DataFrame(results)
 # Calculate the total number of inspections in 2025
 annual_total = df["inspection_count"].sum()
 
+
+# Validate monthly inspection data
+assert len(df) == 12, "Expected 12 months of data"
+assert df["inspection_count"].notna().all(), "Missing inspection counts"
+assert (df["inspection_count"] >= 0).all(), "Negative inspection counts"
+
+print("\nValidation passed: 12 months with valid inspection counts.")
+
+
 print("\nMonthly inspection summary:")
 print(df.to_string(index=False))
 
