@@ -1,5 +1,12 @@
 # MCMIS Company Census processing
 
+October 16 extension: the existing census command and tests below are preserved.
+For the three-source 2016–2025 carrier/year workflow extending Ayaan's integration
+script, see [FMCSA preprocessing](fmcsa_pipeline.md). It reuses this module's
+numeric/geographic parsers; its output grain and signed-int64 sums differ from
+the original census summaries described here. The October 9 validation record
+below remains historical, not a new full-export benchmark.
+
 Run from the repository root with Python 3.10 or newer. pandas is the only
 third-party dependency; tests use the standard library's unittest.
 
