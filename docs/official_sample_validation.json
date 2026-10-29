@@ -1,0 +1,109 @@
+{
+  "verified_date": "2026-10-16",
+  "purpose": "Nonrepresentative ordered smoke samples; census selected by event DOTs",
+  "sources": {
+    "crash-window": {
+      "dataset": "aayw-vxb3",
+      "url": "https://data.transportation.gov/resource/aayw-vxb3.csv?%24where=report_date+%3E%3D+%2720160101%27+AND+report_date+%3C+%2720260101%27&%24order=crash_id&%24limit=100",
+      "sha256": "29c464e5e22f005a4ae6dee7a2213f38d1ffd864cc01b2a72f1578b14adafc33",
+      "bytes": 50121,
+      "rows": 100
+    },
+    "inspection-window": {
+      "dataset": "fx4q-ay7w",
+      "url": "https://data.transportation.gov/resource/fx4q-ay7w.csv?%24where=insp_date+%3E%3D+%2720160101%27+AND+insp_date+%3C+%2720260101%27&%24order=inspection_id&%24limit=100",
+      "sha256": "cde095c6a9f288ff7d6efdaa8f0092aa0ca49b050a850bdce3934989a21b9f59",
+      "bytes": 47214,
+      "rows": 100
+    },
+    "census-linked": {
+      "dataset": "az4n-8mr2",
+      "url": "https://data.transportation.gov/resource/az4n-8mr2.csv?%24where=dot_number+in+%285810%2C16247%2C16362%2C21800%2C28921%2C53467%2C57029%2C58350%2C63391%2C63585%2C65769%2C76198%2C77949%2C80806%2C84337%2C84387%2C89243%2C94645%2C97182%2C120195%2C122075%2C146102%2C148431%2C154237%2C168358%2C172283%2C172690%2C178538%2C191496%2C207039%2C216629%2C246204%2C251206%2C260558%2C263863%2C264184%2C265752%2C268239%2C273818%2C277305%2C281239%2C281321%2C283462%2C286770%2C295866%2C303024%2C304847%2C306223%2C311711%2C313891%2C319570%2C320531%2C327574%2C332037%2C332207%2C333153%2C338658%2C354406%2C383914%2C393114%2C397962%2C466550%2C484360%2C487202%2C489028%2C493424%2C511344%2C546240%2C548304%2C580397%2C609714%2C619481%2C619869%2C666007%2C688188%2C721704%2C728630%2C746785%2C765074%2C863258%2C866673%2C877113%2C880886%2C910824%2C972055%2C1019043%2C1021423%2C1053472%2C1072234%2C1119407%2C1161654%2C1162964%2C1162977%2C1181003%2C1181967%2C1195913%2C1266329%2C1298994%2C1303404%2C1307204%2C1313194%2C1337475%2C1358485%2C1395523%2C1457229%2C1459023%2C1486168%2C1511148%2C1529461%2C1534531%2C1539823%2C1585633%2C1593103%2C1657229%2C1674840%2C1759652%2C1779694%2C1792485%2C1844135%2C2044323%2C2064149%2C2131423%2C2138128%2C2165657%2C2205609%2C2215557%2C2216455%2C2276880%2C2284872%2C2308602%2C2344523%2C2426975%2C2435418%2C2451893%2C2458412%2C2490825%2C2507829%2C2514939%2C2575507%2C2583285%2C2596779%2C2723799%2C2781583%2C2790167%2C2818332%2C2822873%2C2881143%2C2911978%2C3012051%2C3061058%2C3062532%2C3175200%2C3258811%2C3313395%2C3345061%2C3411741%2C3499065%2C3504332%2C3602884%2C3613536%2C3630240%2C3643447%2C3707587%2C3738009%2C3799777%2C3850971%2C3895144%2C3938284%2C3994323%2C4114091%29&%24order=dot_number&%24limit=1000",
+      "sha256": "5362e6e6cb6d24d6f56d975b0063bcaf303421c8791566cd124be68552a93d49",
+      "bytes": 97093,
+      "rows": 170
+    }
+  },
+  "validation": {
+    "chunk_sizes": [
+      17,
+      100
+    ],
+    "identical_csv_and_quality_json": [
+      "carriers.csv",
+      "carrier_safety_2016_2025.csv",
+      "crash_carrier_year.csv",
+      "inspection_carrier_year.csv",
+      "monthly_activity.csv",
+      "quality.json",
+      "integration_validation.json"
+    ],
+    "equal_arrow_tables": [
+      "carriers.parquet",
+      "carrier_safety_2016_2025.parquet",
+      "crash_carrier_year.parquet",
+      "inspection_carrier_year.parquet",
+      "monthly_activity.parquet"
+    ],
+    "reconciliation": {
+      "census_carriers": 170,
+      "integrated_carrier_years": 174,
+      "event_union_carrier_years": 174,
+      "integrated_distinct_carriers": 170,
+      "census_carriers_with_events": 170,
+      "census_carriers_without_events": 0,
+      "crash": {
+        "retained_linkable_records": 82,
+        "integrated_records": 82,
+        "monthly_records": 100,
+        "matched_records": 82,
+        "unmatched_records": 0,
+        "matched_distinct_carriers": 78,
+        "unmatched_distinct_carriers": 0,
+        "measurements": {
+          "FATALITIES": {
+            "observed_records": 82,
+            "observed_sum": 0
+          },
+          "INJURIES": {
+            "observed_records": 82,
+            "observed_sum": 33
+          }
+        }
+      },
+      "inspection": {
+        "retained_linkable_records": 100,
+        "integrated_records": 100,
+        "monthly_records": 100,
+        "matched_records": 100,
+        "unmatched_records": 0,
+        "matched_distinct_carriers": 96,
+        "unmatched_distinct_carriers": 0,
+        "measurements": {
+          "VIOL_TOTAL": {
+            "observed_records": 100,
+            "observed_sum": 139
+          },
+          "OOS_TOTAL": {
+            "observed_records": 100,
+            "observed_sum": 28
+          },
+          "VEHICLE_OOS_TOTAL": {
+            "observed_records": 100,
+            "observed_sum": 17
+          },
+          "DRIVER_OOS_TOTAL": {
+            "observed_records": 100,
+            "observed_sum": 11
+          }
+        }
+      },
+      "checks_passed": true
+    }
+  },
+  "dictionaries": {
+    "aayw-vxb3": "5bf2634607609669371e3d6c15583e0c432a46e5b0082237109e9c8403664b6d",
+    "az4n-8mr2": "8d161e59becb19bc1c3efb3369614f23eecd49f5d117d7c41ad44bc9c60c75e8",
+    "fx4q-ay7w": "17c02ed6780f69b46384eb7fcd27003c5477d94c259ffae56957562e63b0d640"
+  }
+}
