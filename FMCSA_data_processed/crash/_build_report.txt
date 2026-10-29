@@ -1,0 +1,46 @@
+[1] Loaded 2,168,212 raw vehicle rows from 12 files
+
+[2] Clean + type
+  duplicate crash_id rows dropped: 0
+  rows outside 2015-01-01..2026-10-29 or unparseable report_date dropped: 0
+  invalid report_time set to NA: 1,060 (plus 0 blank)
+  county_fips not matching a 2020 Census county: 21,441 (1.0%) -> kept, flagged by county_fips_valid
+
+[3] Crash-level table (1 row per crash)
+  report_numbers with >1 distinct report_date: 6,636
+  crashes whose fatalities             differs between vehicle rows: 58
+  crashes whose injuries               differs between vehicle rows: 406
+  crashes whose vehicles_in_accident   differs between vehicle rows: 194
+  crashes whose weather_condition_id   differs between vehicle rows: 83
+  crashes whose county_code            differs between vehicle rows: 265
+  crashes: 2,026,244  (from 2,168,212 vehicle rows, 6.4% involve 2+ CMVs)
+  crash state != reporting state: 2
+  severity mix: {'Tow-away': 1253672, 'Injury': 717517, 'Fatal': 55055}
+
+[4] Vehicle / carrier / event tables
+  vehicle rows with no USDOT number: 465,219 (21.5%) -> cannot join to carrier census
+  vehicle rows with no crash events recorded: 332,426
+
+[5] Dashboard rollups
+
+[6] Writing parquet
+  wrote crash                   2,026,244 rows   38 cols
+  wrote crash_vehicle           2,168,212 rows   19 cols
+  wrote crash_carrier           2,168,212 rows   15 cols
+  wrote crash_event             2,684,271 rows    6 cols
+  wrote agg_state_year                633 rows   14 cols
+  wrote agg_state_month             7,315 rows   14 cols
+  wrote dim_trafficway                  6 rows    2 cols
+  wrote dim_access_control              3 rows    2 cols
+  wrote dim_road_surface                9 rows    2 cols
+  wrote dim_weather                     9 rows    2 cols
+  wrote dim_light                       8 rows    2 cols
+  wrote dim_cargo_body                 16 rows    2 cols
+  wrote dim_gvw_rating                  3 rows    2 cols
+  wrote dim_vehicle_config             12 rows    2 cols
+  wrote dim_event                      22 rows    2 cols
+  wrote dim_ci_status                   8 rows    2 cols
+  wrote dim_carrier_interstate          3 rows    2 cols
+  wrote dim_truck_bus                   2 rows    2 cols
+  wrote dim_state                      57 rows    4 cols
+  wrote dim_county                  3,235 rows    5 cols
