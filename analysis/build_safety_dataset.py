@@ -152,10 +152,15 @@ def ingest(database, kind, path, chunk_size):
             insert = f"INSERT INTO {kind} VALUES ({','.join('?' for _ in stored)})"
             key_index = stored.index(spec['key'])
             dot_index = stored.index('DOT_NUMBER')
+            prepared = []
+            for name in stored:
+                values = clean[name].to_numpy(dtype=object, na_value=None)
+                if name in numeric_columns:
+                    prepared.append([None if value is None else int(value) for value in values])
+                else:
+                    prepared.append([None if value is None else str(value) for value in values])
             pending = []
-            for raw_row in clean[stored].itertuples(index=False, name=None):
-                row = tuple(None if pd.isna(v) else int(v) if n in numeric_columns else str(v)
-                            for n, v in zip(stored, raw_row))
+            for row in zip(*prepared):
                 if row[key_index] is None:
                     totals['excluded_identifier'] += 1
                     continue
