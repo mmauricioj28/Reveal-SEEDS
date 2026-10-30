@@ -151,9 +151,11 @@ def ingest(database, kind, path, chunk_size):
                                            for c, s in zip(clean['PHY_COUNTRY'], clean['PHY_STATE'])]
             insert = f"INSERT INTO {kind} VALUES ({','.join('?' for _ in stored)})"
             key_index = stored.index(spec['key'])
-            for row in clean[stored].itertuples(index=False, name=None):
+            dot_index = stored.index('DOT_NUMBER')
+            pending = []
+            for raw_row in clean[stored].itertuples(index=False, name=None):
                 row = tuple(None if pd.isna(v) else int(v) if n in numeric_columns else str(v)
-                            for n, v in zip(stored, row))
+                            for n, v in zip(stored, raw_row))
                 if row[key_index] is None:
                     totals['excluded_identifier'] += 1
                     continue
@@ -167,15 +169,39 @@ def ingest(database, kind, path, chunk_size):
                     if kind == 'inspection' and row[stored.index('CI_STATUS_CODE')] == 'D':
                         totals['excluded_status'] += 1
                         continue
-                try:
-                    database.execute(insert, row)
-                except sqlite3.IntegrityError:
-                    previous = database.execute(f"SELECT * FROM {kind} WHERE {spec['key']}=?", (row[key_index],)).fetchone()
-                    totals['duplicate_rows'] += 1
-                    totals['conflicting_duplicate_rows'] += previous != row
-                    continue
+                pending.append(row)
+            first, later = {}, []
+            for row in pending:
+                key = row[key_index]
+                if key in first:
+                    later.append(row)
+                else:
+                    first[key] = row
+            existing = {}
+            keys = list(first)
+            for start in range(0, len(keys), 500):
+                batch = keys[start:start + 500]
+                placeholders = ','.join('?' for _ in batch)
+                for stored_row in database.execute(
+                        f'SELECT * FROM {kind} WHERE {spec["key"]} IN ({placeholders})', batch):
+                    existing[stored_row[key_index]] = stored_row
+            fresh = []
+            for key, row in first.items():
+                if key in existing:
+                    later.append(row)
+                else:
+                    fresh.append(row)
+            if fresh:
+                database.executemany(insert, fresh)
+            for row in later:
+                previous = existing.get(row[key_index], first[row[key_index]])
+                totals['duplicate_rows'] += 1
+                totals['conflicting_duplicate_rows'] += previous != row
+            for row in fresh:
                 totals['retained_rows'] += 1
-                totals['retained_unidentified' if row[stored.index('DOT_NUMBER')] is None else 'retained_linkable'] += 1
+                totals['retained_unidentified' if row[dot_index] is None else 'retained_linkable'] += 1
+            if len(clean) >= 10000:
+                print(f'{kind} input {totals["input_rows"]}', flush=True)
             database.commit()
     if kind != 'census':
         database.execute(f'CREATE INDEX {kind}_dot_year ON {kind}(DOT_NUMBER,YEAR)')
