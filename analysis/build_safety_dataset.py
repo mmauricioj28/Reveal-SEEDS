@@ -7,8 +7,11 @@ import hashlib
 import json
 from pathlib import Path
 import platform
+import shutil
 import sqlite3
 import tempfile
+import time
+import tracemalloc
 
 import pandas as pd
 from analysis.mcmis_chunked import hashed_lines, integer_values, location_codes, location_group
@@ -148,9 +151,16 @@ def ingest(database, kind, path, chunk_size):
                                            for c, s in zip(clean['PHY_COUNTRY'], clean['PHY_STATE'])]
             insert = f"INSERT INTO {kind} VALUES ({','.join('?' for _ in stored)})"
             key_index = stored.index(spec['key'])
-            for row in clean[stored].itertuples(index=False, name=None):
-                row = tuple(None if pd.isna(v) else int(v) if n in numeric_columns else str(v)
-                            for n, v in zip(stored, row))
+            dot_index = stored.index('DOT_NUMBER')
+            prepared = []
+            for name in stored:
+                values = clean[name].to_numpy(dtype=object, na_value=None)
+                if name in numeric_columns:
+                    prepared.append([None if value is None else int(value) for value in values])
+                else:
+                    prepared.append([None if value is None else str(value) for value in values])
+            pending = []
+            for row in zip(*prepared):
                 if row[key_index] is None:
                     totals['excluded_identifier'] += 1
                     continue
@@ -164,15 +174,39 @@ def ingest(database, kind, path, chunk_size):
                     if kind == 'inspection' and row[stored.index('CI_STATUS_CODE')] == 'D':
                         totals['excluded_status'] += 1
                         continue
-                try:
-                    database.execute(insert, row)
-                except sqlite3.IntegrityError:
-                    previous = database.execute(f"SELECT * FROM {kind} WHERE {spec['key']}=?", (row[key_index],)).fetchone()
-                    totals['duplicate_rows'] += 1
-                    totals['conflicting_duplicate_rows'] += previous != row
-                    continue
+                pending.append(row)
+            first, later = {}, []
+            for row in pending:
+                key = row[key_index]
+                if key in first:
+                    later.append(row)
+                else:
+                    first[key] = row
+            existing = {}
+            keys = list(first)
+            for start in range(0, len(keys), 500):
+                batch = keys[start:start + 500]
+                placeholders = ','.join('?' for _ in batch)
+                for stored_row in database.execute(
+                        f'SELECT * FROM {kind} WHERE {spec["key"]} IN ({placeholders})', batch):
+                    existing[stored_row[key_index]] = stored_row
+            fresh = []
+            for key, row in first.items():
+                if key in existing:
+                    later.append(row)
+                else:
+                    fresh.append(row)
+            if fresh:
+                database.executemany(insert, fresh)
+            for row in later:
+                previous = existing.get(row[key_index], first[row[key_index]])
+                totals['duplicate_rows'] += 1
+                totals['conflicting_duplicate_rows'] += previous != row
+            for row in fresh:
                 totals['retained_rows'] += 1
-                totals['retained_unidentified' if row[stored.index('DOT_NUMBER')] is None else 'retained_linkable'] += 1
+                totals['retained_unidentified' if row[dot_index] is None else 'retained_linkable'] += 1
+            if len(clean) >= 10000:
+                print(f'{kind} input {totals["input_rows"]}', flush=True)
             database.commit()
     if kind != 'census':
         database.execute(f'CREATE INDEX {kind}_dot_year ON {kind}(DOT_NUMBER,YEAR)')
@@ -190,8 +224,19 @@ def aggregate(database, kind):
     database.execute(f'CREATE UNIQUE INDEX {kind}_year_key ON {kind}_year(DOT_NUMBER,YEAR)')
 
 
+def classify_linkage(database, kind):
+    """Matched DOT is in the census extract. Unidentified DOT is not unmatched."""
+    database.execute(f'ALTER TABLE {kind} ADD COLUMN match_status TEXT')
+    database.execute(f"UPDATE {kind} SET match_status='unidentified' WHERE DOT_NUMBER IS NULL")
+    database.execute(f"UPDATE {kind} SET match_status='matched' WHERE match_status IS NULL "
+                     f'AND DOT_NUMBER IN (SELECT DOT_NUMBER FROM census)')
+    database.execute(f"UPDATE {kind} SET match_status='unmatched' WHERE match_status IS NULL")
+
+
 def integrate(database):
     """Join preaggregated sources at one unioned DOT/year key; keep census separate."""
+    for kind in ('crash', 'inspection'):
+        classify_linkage(database, kind)
     database.execute('CREATE TABLE event_keys AS SELECT DOT_NUMBER,YEAR FROM crash_year UNION SELECT DOT_NUMBER,YEAR FROM inspection_year')
     census = [r[1] for r in database.execute('PRAGMA table_info(census)') if r[1] != 'DOT_NUMBER']
     fields = ['k.DOT_NUMBER', 'k.YEAR', 'CASE WHEN c.DOT_NUMBER IS NULL THEN 0 ELSE 1 END AS census_matched']
@@ -206,8 +251,8 @@ def integrate(database):
                      'LEFT JOIN inspection_year i ON k.DOT_NUMBER=i.DOT_NUMBER AND k.YEAR=i.YEAR')
     database.execute('CREATE UNIQUE INDEX integrated_key ON integrated(DOT_NUMBER,YEAR)')
     database.execute('CREATE TABLE monthly AS ' + ' UNION ALL '.join(
-        f"SELECT '{kind}' AS source,YEAR,MONTH,{geo} AS event_state,REPORT_STATE,COUNT(*) AS record_count "
-        f'FROM {kind} GROUP BY YEAR,MONTH,{geo},REPORT_STATE'
+        f"SELECT '{kind}' AS source,YEAR,MONTH,{geo} AS event_state,REPORT_STATE,match_status,COUNT(*) AS record_count "
+        f'FROM {kind} GROUP BY YEAR,MONTH,{geo},REPORT_STATE,match_status'
         for kind, geo in (('crash', 'STATE'), ('inspection', 'REPORT_STATE'))))
 
 
@@ -215,7 +260,7 @@ def export_query(database, query, path, chunk_size, parquet=False):
     """Stream batches with explicit Arrow types, including empty/null-first outputs."""
     cursor = database.execute(query)
     names = [d[0] for d in cursor.description]
-    strings = {'DOT_NUMBER', *CENSUS_CODES, 'LOCATION_GROUP', 'source', 'event_state', 'REPORT_STATE'}
+    strings = {'DOT_NUMBER', *CENSUS_CODES, 'LOCATION_GROUP', 'source', 'event_state', 'REPORT_STATE', 'match_status'}
     writer = None
     if parquet:
         import pyarrow as pa
@@ -256,36 +301,47 @@ def build_pipeline(census_path=None, crash_path=None, inspection_path=None, outp
     if destination.exists():
         raise ValueError('Output directory already exists; choose a new run directory')
     destination.parent.mkdir(parents=True, exist_ok=True)
-    original_stats = {k: (p.stat().st_size, p.stat().st_mtime_ns) for k, p in paths.items()}
-    with tempfile.TemporaryDirectory(prefix='.fmcsa-', dir=destination.parent) as temporary:
-        stage = Path(temporary) / 'reports'
-        stage.mkdir()
-        with closing(sqlite3.connect(Path(temporary) / 'records.sqlite')) as database:
-            database.execute('PRAGMA cache_size=-8192')
-            database.execute('PRAGMA temp_store=FILE')
-            quality = {k: ingest(database, k, p, chunk_size) for k, p in paths.items()}
-            for kind in METRICS:
-                aggregate(database, kind)
-            integrate(database)
-            reconciliation = validate_integration(database, quality, METRICS)
-            for table, filename, order in (('census', 'carriers', 'DOT_NUMBER'),
-                                            ('crash_year', 'crash_carrier_year', 'DOT_NUMBER,YEAR'),
-                                            ('inspection_year', 'inspection_carrier_year', 'DOT_NUMBER,YEAR'),
-                                            ('integrated', 'carrier_safety_2016_2025', 'DOT_NUMBER,YEAR'),
-                                            ('monthly', 'monthly_activity', 'source,YEAR,MONTH,event_state,REPORT_STATE')):
-                export_query(database, f'SELECT * FROM {table} ORDER BY {order}', stage / (filename + '.csv'), chunk_size, parquet)
-            (stage / 'quality.json').write_text(json.dumps(quality, indent=2) + '\n', encoding='utf-8')
-            (stage / 'integration_validation.json').write_text(json.dumps(reconciliation, indent=2) + '\n', encoding='utf-8')
-        for kind, path in paths.items():
-            if original_stats[kind] != (path.stat().st_size, path.stat().st_mtime_ns):
-                raise ValueError(f'Input changed during processing: {path}')
-        metadata = {'period': [2016, 2025], 'chunk_size': chunk_size, 'python': platform.python_version(),
-                    'pandas': pd.__version__, 'pyarrow': pyarrow.__version__ if parquet else None,
-                    'inputs': {k: v['metadata'] for k, v in quality.items()},
-                    'grain': 'observed event DOT/year union; census-only carriers separate'}
-        (stage / 'run_metadata.json').write_text(json.dumps(metadata, indent=2) + '\n', encoding='utf-8')
-        stage.rename(destination)
-    return destination / ('carrier_safety_2016_2025.parquet' if parquet else 'carrier_safety_2016_2025.csv')
+    started = time.perf_counter()
+    tracemalloc.start()
+    try:
+        original_stats = {k: (p.stat().st_size, p.stat().st_mtime_ns) for k, p in paths.items()}
+        with tempfile.TemporaryDirectory(prefix='.fmcsa-', dir=destination.parent) as temporary:
+            stage = Path(temporary) / 'reports'
+            stage.mkdir()
+            with closing(sqlite3.connect(Path(temporary) / 'records.sqlite')) as database:
+                database.execute('PRAGMA cache_size=-8192')
+                database.execute('PRAGMA temp_store=FILE')
+                quality = {k: ingest(database, k, p, chunk_size) for k, p in paths.items()}
+                for kind in METRICS:
+                    aggregate(database, kind)
+                integrate(database)
+                reconciliation = validate_integration(database, quality, METRICS)
+                for table, filename, order in (('census', 'carriers', 'DOT_NUMBER'),
+                                                ('crash_year', 'crash_carrier_year', 'DOT_NUMBER,YEAR'),
+                                                ('inspection_year', 'inspection_carrier_year', 'DOT_NUMBER,YEAR'),
+                                                ('integrated', 'carrier_safety_2016_2025', 'DOT_NUMBER,YEAR'),
+                                                ('monthly', 'monthly_activity', 'source,YEAR,MONTH,event_state,REPORT_STATE,match_status')):
+                    export_query(database, f'SELECT * FROM {table} ORDER BY {order}', stage / (filename + '.csv'), chunk_size, parquet)
+                (stage / 'quality.json').write_text(json.dumps(quality, indent=2) + '\n', encoding='utf-8')
+                (stage / 'integration_validation.json').write_text(json.dumps(reconciliation, indent=2) + '\n', encoding='utf-8')
+            for kind, path in paths.items():
+                if original_stats[kind] != (path.stat().st_size, path.stat().st_mtime_ns):
+                    raise ValueError(f'Input changed during processing: {path}')
+            _, peak = tracemalloc.get_traced_memory()
+            metadata = {'period': [2016, 2025], 'chunk_size': chunk_size, 'python': platform.python_version(),
+                        'pandas': pd.__version__, 'pyarrow': pyarrow.__version__ if parquet else None,
+                        'inputs': {k: v['metadata'] for k, v in quality.items()},
+                        'grain': 'observed event DOT/year union; census-only carriers separate',
+                        'runtime_seconds': round(time.perf_counter() - started, 3),
+                        'tracemalloc_peak_bytes': peak,
+                        'staged_output_bytes': sum(p.stat().st_size for p in stage.iterdir() if p.is_file()),
+                        'destination_free_bytes': shutil.disk_usage(destination.parent).free}
+            (stage / 'run_metadata.json').write_text(json.dumps(metadata, indent=2) + '\n', encoding='utf-8')
+            stage.rename(destination)
+        return destination / ('carrier_safety_2016_2025.parquet' if parquet else 'carrier_safety_2016_2025.csv')
+    finally:
+        if tracemalloc.is_tracing():
+            tracemalloc.stop()
 
 
 def main(argv=None):

@@ -60,6 +60,20 @@ def validate_integration(database, quality, metrics):
         unmatched = scalar(f'SELECT COALESCE(SUM({count_column}),0) FROM integrated WHERE census_matched=0')
         require(counts['retained_linkable'] == grouped == integrated == matched + unmatched, f'{kind} event totals')
         require(monthly == counts['retained_rows'], f'{kind} monthly totals including unidentified')
+        status_rows = dict(database.execute(f'SELECT match_status, COUNT(*) FROM {kind} GROUP BY match_status'))
+        known = ('matched', 'unmatched', 'unidentified')
+        require(set(status_rows) <= set(known), f'{kind} match-status labels')
+        require(sum(status_rows.get(name, 0) for name in known) == counts['retained_rows'], f'{kind} match-status partition')
+        require(status_rows.get('unidentified', 0) == counts['retained_unidentified'], f'{kind} unidentified count')
+        require(status_rows.get('matched', 0) + status_rows.get('unmatched', 0) == counts['retained_linkable'],
+                f'{kind} linkable match-status')
+        require(status_rows.get('matched', 0) == matched and status_rows.get('unmatched', 0) == unmatched,
+                f'{kind} census join matches event labels')
+        for status in known:
+            monthly_status = scalar("SELECT COALESCE(SUM(record_count),0) FROM monthly "
+                                    f"WHERE source='{kind}' AND match_status='{status}'")
+            require(monthly_status == status_rows.get(status, 0), f'{kind} monthly {status}')
+        linkable = status_rows.get('matched', 0) + status_rows.get('unmatched', 0)
         measurements = {}
         for source, target in metrics[kind].items():
             raw_sum, observed = database.execute(
@@ -70,8 +84,12 @@ def validate_integration(database, quality, metrics):
             measurements[source] = {'observed_records': observed, 'observed_sum': raw_sum}
         result[kind] = {'retained_linkable_records': grouped, 'integrated_records': integrated,
                         'monthly_records': monthly, 'matched_records': matched, 'unmatched_records': unmatched,
+                        'unidentified_records': status_rows.get('unidentified', 0),
                         'matched_distinct_carriers': scalar(f'SELECT COUNT(DISTINCT DOT_NUMBER) FROM integrated WHERE census_matched=1 AND {count_column}>0'),
                         'unmatched_distinct_carriers': scalar(f'SELECT COUNT(DISTINCT DOT_NUMBER) FROM integrated WHERE census_matched=0 AND {count_column}>0'),
+                        'unmatched_of_linkable': {'numerator': status_rows.get('unmatched', 0), 'denominator': linkable,
+                                                  'percent': None if linkable == 0 else round(100 * status_rows.get('unmatched', 0) / linkable, 4),
+                                                  'denominator_definition': 'retained records with a usable DOT_NUMBER; unidentified records are excluded'},
                         'measurements': measurements}
     result['checks_passed'] = True
     return result

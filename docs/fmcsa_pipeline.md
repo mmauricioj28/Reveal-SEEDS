@@ -30,8 +30,18 @@ in [the sample receipt](official_sample_validation.json). Ordered samples are
 nonrepresentative; targeted census matching makes sample linkage coverage
 artificially high. Live endpoints may revise records, so new hashes can differ.
 Michael's downloader is on his exploration branch. A full export needs a
-complete portal export or validated API
-pagination, not just increasing `$limit` and assuming the server honored it.
+complete portal export or validated API pagination, not just increasing `$limit`
+and assuming the server honored it.
+
+Selected-column national extracts, checked against portal `count(*)` before and
+after the download:
+
+```sh
+python -m analysis.fetch_fmcsa_extract --dataset all --output-dir data
+```
+
+The command writes `data/census.csv`, `data/crash.csv`, and `data/inspection.csv`
+only when the row counts match. It does not commit those files.
 
 Required headers after trim/uppercase:
 
@@ -94,7 +104,7 @@ must not be automatically filled with zero. Read DOT_NUMBER as string.
 | crash_carrier_year | One DOT/year per observed crash source, TOTAL_CRASHES and reported FATALITIES/INJURIES sums with `_observed` counts |
 | inspection_carrier_year | One DOT/year per observed inspection source, TOTAL_INSPECTIONS, violation/OOS sums with `_observed` counts |
 | carrier_safety_2016_2025 | Union of event DOT/year keys, joined one-to-one to source aggregates and many-to-one to census; census_matched=0 preserves event-only keys |
-| monthly_activity | source/year/month/event_state/REPORT_STATE counts, including valid dated records without usable DOT |
+| monthly_activity | source/year/month/event_state/REPORT_STATE/match_status counts. Matched means a usable DOT is in the census extract. Unmatched means a usable DOT is absent from that extract. Unidentified means the DOT is missing or invalid. Unidentified records are not included in the unmatched percentage. Crash `event_state` is the crash file STATE. Inspection `event_state` is REPORT_STATE. Neither is carrier headquarters. |
 
 `TOTAL_FATALITIES`, `TOTAL_INJURIES`, `TOTAL_VIOLATIONS`, `TOTAL_OOS`,
 `TOTAL_VEHICLE_OOS` and `TOTAL_DRIVER_OOS` sum only observed numeric values.
