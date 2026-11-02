@@ -90,6 +90,27 @@ def monthly_chart(eda_dir, out):
         save(fig, out / f'monthly_{source}.png')
 
 
+def season_chart(eda_dir, out):
+    path = Path(eda_dir) / 'month_of_year.csv'
+    fig, ax = plt.subplots(figsize=(9, 5))
+    data = pd.read_csv(path) if path.is_file() else pd.DataFrame()
+    if data.empty:
+        ax.text(0.5, 0.5, 'No observed months. Missing months are not plotted as zero.', ha='center', va='center')
+    else:
+        for source, group in data.groupby('source'):
+            group = group.sort_values('MONTH')
+            ax.plot(group['MONTH'].astype(int), group['mean_records_per_day'], marker='o', label=source)
+        ax.legend(title='Source')
+        ax.set_xticks(range(1, 13))
+        ax.set_xticklabels(MONTHS)
+    ax.set_title('Mean records per calendar day, by month of year')
+    ax.set_xlabel('Month')
+    ax.set_ylabel('Mean records per calendar day (not per mile)')
+    ax.text(0, -0.2, 'Average of years in which that month was observed. Not an exposure rate.',
+            transform=ax.transAxes, fontsize=8, va='top')
+    save(fig, out / 'month_of_year.png')
+
+
 def state_chart(eda_dir, out, top=10):
     data = pd.read_csv(eda_dir / 'state_year_activity.csv')
     for source in ('crash', 'inspection'):
@@ -157,6 +178,7 @@ def run(eda_dir, output_dir):
     out.mkdir(parents=True)
     yearly_chart(eda_dir, out)
     monthly_chart(eda_dir, out)
+    season_chart(eda_dir, out)
     state_chart(eda_dir, out)
     fleet_chart(eda_dir, out)
     operation_chart(eda_dir, out)

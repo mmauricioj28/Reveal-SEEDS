@@ -36,6 +36,12 @@ class EdaTrendsTests(unittest.TestCase):
                 (excluded.all_retained_records, excluded.used_in_comparisons_matched,
                  excluded.excluded_unmatched, excluded.excluded_unidentified), (3, 1, 1, 1))
             self.assertEqual(int(outputs['by_fleet_size_matched_only']['crash_records'].sum()), 1)
+            season = outputs['month_of_year']
+            crash_months = set(season.loc[season['source'] == 'crash', 'MONTH'].astype(int))
+            self.assertEqual(crash_months, {1})
+            january = season[(season['source'] == 'crash') & (season['MONTH'] == 1)].iloc[0]
+            self.assertEqual(int(january.years_observed), 1)
+            self.assertIn('Unobserved months are omitted', january.note)
             with self.assertRaises(ValueError):
                 run(root / 'run', root / 'eda')
 

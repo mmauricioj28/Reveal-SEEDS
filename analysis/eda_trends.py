@@ -95,6 +95,20 @@ def monthly_pattern(monthly):
     return table.sort_values(['source', 'YEAR', 'MONTH'])
 
 
+def month_of_year(pattern):
+    """Average observed years only. Unobserved months are left out, not filled with zero."""
+    columns = ['source', 'MONTH', 'years_observed', 'mean_records_per_day', 'note']
+    note = ('Mean of records per calendar day across years that contain this month. '
+            'Not an exposure rate. Unobserved months are omitted.')
+    if pattern.empty:
+        return pd.DataFrame(columns=columns)
+    grouped = pattern.groupby(['source', 'MONTH'], as_index=False).agg(
+        years_observed=('YEAR', 'nunique'), mean_records_per_day=('records_per_day', 'mean'))
+    grouped['mean_records_per_day'] = grouped['mean_records_per_day'].round(2)
+    grouped['note'] = note
+    return grouped[columns].sort_values(['source', 'MONTH'])
+
+
 def unobserved_months(monthly):
     """Months absent from the extract. They are not coded as zero events."""
     present = set()
@@ -165,10 +179,12 @@ def run(run_dir, output_dir):
         if column in integrated:
             integrated[column] = pd.to_numeric(integrated[column])
 
+    pattern = monthly_pattern(monthly)
     outputs = {
         'excluded_record_counts': excluded_counts(monthly),
         'yearly_activity': yearly_activity(monthly),
-        'monthly_pattern': monthly_pattern(monthly),
+        'monthly_pattern': pattern,
+        'month_of_year': month_of_year(pattern),
         'unobserved_months': unobserved_months(monthly),
         'state_year_activity': state_year(monthly),
         'by_fleet_size_matched_only': characteristic_comparison(integrated, 'POWER_UNITS', 'fleet_bin'),

@@ -33,7 +33,7 @@ class PlotTrendTests(unittest.TestCase):
             eda_run(root / 'run', root / 'eda')
             names = plot_run(root / 'eda', root / 'charts')
             for name in ('yearly_crash.png', 'yearly_inspection.png', 'monthly_crash.png', 'monthly_inspection.png',
-                         'states_crash.png', 'states_inspection.png', 'fleet_size_crashes.png',
+                         'month_of_year.png', 'states_crash.png', 'states_inspection.png', 'fleet_size_crashes.png',
                          'carrier_operation_crashes.png'):
                 self.assertIn(name, names)
                 self.assertGreater((root / 'charts' / name).stat().st_size, 1000)
