@@ -72,14 +72,22 @@ def status_counts(monthly, keys):
 
 
 def yearly_activity(monthly):
+    """Year-over-year percent is blank unless both years have all 12 months observed."""
     result = status_counts(monthly, ['source', 'YEAR']).sort_values(['source', 'YEAR'])
     if result.empty:
         result['yoy_change_pct'] = []
         return result
+    observed_months = monthly.groupby(['source', 'YEAR'])['MONTH'].nunique()
     previous = result.groupby('source')['all_retained_records'].shift()
     previous_year = result.groupby('source')['YEAR'].shift()
     change = (result['all_retained_records'] - previous) / previous * 100
-    result['yoy_change_pct'] = change.where((previous_year + 1 == result['YEAR']) & (previous > 0)).round(2)
+
+    def both_years_complete(row):
+        prior = row['YEAR'] - 1
+        return observed_months.get((row['source'], row['YEAR']), 0) == 12 and observed_months.get((row['source'], prior), 0) == 12
+
+    complete = result.apply(both_years_complete, axis=1)
+    result['yoy_change_pct'] = change.where((previous_year + 1 == result['YEAR']) & (previous > 0) & complete).round(2)
     return result
 
 

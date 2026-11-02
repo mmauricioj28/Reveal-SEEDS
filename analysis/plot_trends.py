@@ -61,8 +61,9 @@ def yearly_chart(eda_dir, out):
             ax.set_ylabel('Records (counts, not rates)')
             ax.set_xticks(frame['YEAR'].astype(int))
             ax.legend(title='Status')
-            ax.text(0, -0.22, 'Unidentified = missing or invalid USDOT. Unmatched = usable USDOT absent from Census.\n'
-                    'Unmatched percent uses usable DOT records only. Recent years may be incomplete.',
+            ax.text(0, -0.28, 'Unidentified = missing or invalid USDOT. Unmatched = usable USDOT absent from Census.\n'
+                    'Unmatched percent uses usable DOT records only. Absent years are omitted, not drawn as zero.\n'
+                    'A year with fewer than 12 observed months is partial.',
                     transform=ax.transAxes, fontsize=8, va='top')
         save(fig, out / f'yearly_{source}.png')
 
@@ -130,7 +131,8 @@ def state_chart(eda_dir, out, top=10):
             ax.legend(title='Status', fontsize=8)
         ax.set_title(f'{source.title()} records by geography')
         ax.set_xlabel('Records (counts, not rates; areas differ in exposure)')
-        ax.text(0, -0.18, GEOGRAPHY[source], transform=ax.transAxes, fontsize=8, va='top')
+        ax.text(0, -0.22, GEOGRAPHY[source] + ' A code such as US is not a state boundary.',
+                transform=ax.transAxes, fontsize=8, va='top')
         save(fig, out / f'states_{source}.png')
 
 

@@ -7,7 +7,7 @@ import unittest
 import pandas as pd
 
 from analysis.build_safety_dataset import build_pipeline
-from analysis.eda_trends import run
+from analysis.eda_trends import run, yearly_activity
 
 
 class EdaTrendsTests(unittest.TestCase):
@@ -44,6 +44,16 @@ class EdaTrendsTests(unittest.TestCase):
             self.assertIn('Unobserved months are omitted', january.note)
             with self.assertRaises(ValueError):
                 run(root / 'run', root / 'eda')
+
+    def test_year_over_year_requires_twelve_observed_months(self):
+        rows = []
+        for year, months in ((2023, (10, 11, 12)), (2024, range(1, 13)), (2025, range(1, 13))):
+            for month in months:
+                rows.append({'source': 'inspection', 'YEAR': year, 'MONTH': month,
+                             'match_status': 'matched', 'record_count': 100, 'event_state': 'TX'})
+        result = yearly_activity(pd.DataFrame(rows)).set_index('YEAR')
+        self.assertTrue(pd.isna(result.loc[2024, 'yoy_change_pct']))
+        self.assertEqual(result.loc[2025, 'yoy_change_pct'], 0.0)
 
 
 if __name__ == '__main__':
