@@ -1,0 +1,25 @@
+source,MONTH,years_observed,mean_records_per_day,note
+crash,1,10,526.09,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+crash,2,10,535.81,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+crash,3,10,491.0,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+crash,4,10,470.85,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+crash,5,10,483.79,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+crash,6,10,506.3,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+crash,7,10,476.35,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+crash,8,10,511.99,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+crash,9,10,529.41,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+crash,10,10,561.34,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+crash,11,10,526.31,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+crash,12,10,522.31,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+inspection,1,2,6860.52,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+inspection,2,2,7447.04,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+inspection,3,2,7160.79,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+inspection,4,2,7762.28,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+inspection,5,2,7746.89,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+inspection,6,2,7560.98,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+inspection,7,2,7906.39,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+inspection,8,2,7743.68,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+inspection,9,2,7883.87,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+inspection,10,3,5286.25,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+inspection,11,3,6754.28,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.
+inspection,12,3,6621.17,Mean of records per calendar day across years that contain this month. Not an exposure rate. Unobserved months are omitted.

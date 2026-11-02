@@ -1,0 +1,5 @@
+carrier_operation,carrier_years,carriers,crash_records,inspection_records,median_crashes_per_carrier_year,median_inspections_per_carrier_year
+A,1065357,476534,1197577,4957879,1.0,1.0
+B,188,77,94,720,0.0,1.0
+C,498296,293941,244753,893157,0.0,1.0
+missing,2011,1627,2796,10,1.0,0.0

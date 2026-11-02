@@ -1,0 +1,191 @@
+{
+  "pipeline_executed_on": "2026-11-02",
+  "download_receipts_dated": "2026-10-30",
+  "command": "python -m analysis.build_safety_dataset --census data/census.csv --crashes data/crash.csv --inspections data/inspection.csv --output-dir outputs/safety_run_2016_2025 --chunk-size 200000 --parquet",
+  "period_requested": [
+    2016,
+    2025
+  ],
+  "chunk_size": 200000,
+  "runtime_seconds": 2552.119,
+  "python": "3.11.9",
+  "pandas": "3.0.5",
+  "pyarrow": "25.0.1",
+  "tracemalloc_peak_bytes": 239352214,
+  "staged_output_bytes": 493192216,
+  "checks_passed": true,
+  "inputs": {
+    "census": {
+      "filename": "census.csv",
+      "sha256": "69b0436f9b36a3fa9f0351ae562f972976378a962b47ab63ad3b1f1e8a82cd00",
+      "bytes": 145330502,
+      "selected_columns": [
+        "DOT_NUMBER",
+        "PHY_STATE",
+        "PHY_COUNTRY",
+        "POWER_UNITS",
+        "TOTAL_DRIVERS",
+        "MCS150_MILEAGE",
+        "MCS150_MILEAGE_YEAR",
+        "CARRIER_OPERATION",
+        "STATUS_CODE",
+        "CARSHIP",
+        "SAFETY_RATING"
+      ],
+      "unavailable_columns": []
+    },
+    "crash": {
+      "filename": "crash.csv",
+      "sha256": "7bc632006f33f29b9b4337ba156f442c858838c192a036c70813f5507d1c03a6",
+      "bytes": 65517436,
+      "selected_columns": [
+        "CRASH_ID",
+        "DOT_NUMBER",
+        "REPORT_DATE",
+        "STATE",
+        "REPORT_STATE",
+        "FATALITIES",
+        "INJURIES",
+        "CI_STATUS_CODE"
+      ],
+      "unavailable_columns": []
+    },
+    "inspection": {
+      "filename": "inspection.csv",
+      "sha256": "aae81c53662b7765af38fba500be87e4e65853a9c19d73a1aa3bc4e1728386a5",
+      "bytes": 237643434,
+      "selected_columns": [
+        "INSPECTION_ID",
+        "DOT_NUMBER",
+        "INSP_DATE",
+        "REPORT_STATE",
+        "INSP_LEVEL_ID",
+        "VIOL_TOTAL",
+        "OOS_TOTAL",
+        "VEHICLE_OOS_TOTAL",
+        "DRIVER_OOS_TOTAL",
+        "CI_STATUS_CODE"
+      ],
+      "unavailable_columns": []
+    }
+  },
+  "row_partition": {
+    "census": {
+      "input_rows": 4523548,
+      "retained_rows": 4523548,
+      "duplicate_rows": 0,
+      "conflicting_duplicate_rows": 0,
+      "excluded_identifier": 0,
+      "excluded_date": 0,
+      "excluded_window": 0,
+      "excluded_status": 0,
+      "retained_unidentified": 0,
+      "retained_linkable": 4523548
+    },
+    "crash": {
+      "input_rows": 1868953,
+      "retained_rows": 1868953,
+      "duplicate_rows": 0,
+      "conflicting_duplicate_rows": 0,
+      "excluded_identifier": 0,
+      "excluded_date": 0,
+      "excluded_window": 0,
+      "excluded_status": 0,
+      "retained_unidentified": 401579,
+      "retained_linkable": 1467374
+    },
+    "inspection": {
+      "input_rows": 5852073,
+      "retained_rows": 5852073,
+      "duplicate_rows": 0,
+      "conflicting_duplicate_rows": 0,
+      "excluded_identifier": 0,
+      "excluded_date": 0,
+      "excluded_window": 0,
+      "excluded_status": 0,
+      "retained_unidentified": 0,
+      "retained_linkable": 5852073
+    }
+  },
+  "reconciliation": {
+    "census_carriers": 4523548,
+    "integrated_carrier_years": 1569209,
+    "event_union_carrier_years": 1569209,
+    "integrated_distinct_carriers": 773094,
+    "census_carriers_with_events": 772179,
+    "census_carriers_without_events": 3751369,
+    "crash": {
+      "retained_linkable_records": 1467374,
+      "integrated_records": 1467374,
+      "monthly_records": 1868953,
+      "matched_records": 1445220,
+      "unmatched_records": 22154,
+      "unidentified_records": 401579,
+      "matched_distinct_carriers": 405540,
+      "unmatched_distinct_carriers": 734,
+      "unmatched_of_linkable": {
+        "numerator": 22154,
+        "denominator": 1467374,
+        "percent": 1.5098,
+        "denominator_definition": "retained records with a usable DOT_NUMBER; unidentified records are excluded"
+      },
+      "measurements": {
+        "FATALITIES": {
+          "observed_records": 1467374,
+          "observed_sum": 49805
+        },
+        "INJURIES": {
+          "observed_records": 1467374,
+          "observed_sum": 725174
+        }
+      }
+    },
+    "inspection": {
+      "retained_linkable_records": 5852073,
+      "integrated_records": 5852073,
+      "monthly_records": 5852073,
+      "matched_records": 5851766,
+      "unmatched_records": 307,
+      "unidentified_records": 0,
+      "matched_distinct_carriers": 566403,
+      "unmatched_distinct_carriers": 206,
+      "unmatched_of_linkable": {
+        "numerator": 307,
+        "denominator": 5852073,
+        "percent": 0.0052,
+        "denominator_definition": "retained records with a usable DOT_NUMBER; unidentified records are excluded"
+      },
+      "measurements": {
+        "VIOL_TOTAL": {
+          "observed_records": 5852073,
+          "observed_sum": 9297676
+        },
+        "OOS_TOTAL": {
+          "observed_records": 5852073,
+          "observed_sum": 1573127
+        },
+        "VEHICLE_OOS_TOTAL": {
+          "observed_records": 5852073,
+          "observed_sum": 1215328
+        },
+        "DRIVER_OOS_TOTAL": {
+          "observed_records": 5852073,
+          "observed_sum": 357799
+        }
+      }
+    },
+    "checks_passed": true
+  },
+  "coverage": {
+    "crash": {
+      "min": "2016-01-01",
+      "max": "2025-12-31",
+      "unobserved_month_count": 0
+    },
+    "inspection": {
+      "min": "2023-10-30",
+      "max": "2025-12-31",
+      "unobserved_month_count": 93
+    }
+  }
+}
