@@ -1,0 +1,3 @@
+source,all_retained_records,used_in_comparisons_matched,excluded_unmatched,excluded_unidentified,pct_excluded,exclusion_denominator,pct_unmatched_of_linkable,unmatched_denominator
+crash,1868953,1445220,22154,401579,22.67,all_retained_records,1.51,usable DOT records only; unidentified records are not in this denominator
+inspection,5852073,5851766,307,0,0.01,all_retained_records,0.01,usable DOT records only; unidentified records are not in this denominator

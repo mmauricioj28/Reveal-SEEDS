@@ -20,6 +20,14 @@ python -m pip install -r requirements-parquet.txt
 Download CSVs from the official FMCSA resources into an ignored local `data/`
 directory. Keep filenames/extract dates and record whether each file is a sample
 or a full export. Do not mix independent samples for population inference.
+A counted download of the selected columns is:
+
+```sh
+python -m analysis.fetch_fmcsa_extract --dataset all --output-dir data
+```
+
+That command writes `census.csv`, `crash.csv`, and `inspection.csv` only when
+the row count matches the portal `count(*)` before and after the download.
 
 - [Company Census](https://data.transportation.gov/Trucking-and-Motorcoaches/Company-Census-File/az4n-8mr2/about_data)
 - [Crash](https://data.transportation.gov/Trucking-and-Motorcoaches/Crash-File/aayw-vxb3/about_data)
@@ -48,8 +56,15 @@ The original census reports remain available:
 
 ```sh
 python -m analysis.mcmis_chunked --input "data/Company_Census_File.csv" --output-dir "outputs/census_run_01" --chunk-size 100000
+python -m analysis.eda_trends --run-dir "outputs/safety_run_01" --output-dir "outputs/eda_01"
+python -m analysis.plot_trends --eda-dir "outputs/eda_01" --output-dir "outputs/charts_01"
 python -m unittest discover -s tests -v
 ```
+
+Yearly, monthly, and state tables keep matched, unmatched, and unidentified
+records. Fleet size, driver count, and carrier operation use matched records
+only, with the excluded counts written beside them. See
+[docs/dashboard_exports.md](docs/dashboard_exports.md).
 
 ## Structure and interpretation
 
@@ -57,13 +72,17 @@ python -m unittest discover -s tests -v
 | --- | --- |
 | analysis/mcmis_chunked.py | Existing census streaming reports and shared numeric/geographic parsers |
 | analysis/build_safety_dataset.py | Extended Ayaan pipeline: three-source ingestion, aggregation, CLI and export |
-| analysis/data_quality.py | Pre-publication count, linkage and measurement invariants |
-| tests/ | Original census/Ayaan tests plus end-to-end pipeline edge cases |
+| analysis/data_quality.py | Pre-publication count, linkage and measurement invariants, including match status |
+| analysis/eda_trends.py | Yearly, monthly, state, and matched-carrier tables from a pipeline run |
+| analysis/plot_trends.py | Charts for those tables. Counts are not labeled as rates |
+| analysis/fetch_fmcsa_extract.py | Selected-column portal download that must match `count(*)` |
+| tests/ | Census, pipeline, linkage, EDA, and chart tests |
 | docs/fmcsa_pipeline.md | Reproduction, schemas, output definitions and quality inspection |
-| docs/research_questions.md | Four descriptive research questions and Week 5 plan |
-| docs/variable_selection.md | Official dictionary/schema review and inclusion decisions |
-| docs/data_quality_decisions.md | Missingness, dates, duplicates, geography and integration contract |
-| docs/weeks3_4_progress.md | Executed validation, attribution, limitations and next steps |
+| docs/dashboard_exports.md | Grain, denominators, and null rules for the EDA tables |
+| docs/research_questions.md | Weeks 3–4 plan and three narrowed Weeks 5–6 questions |
+| docs/eda_findings_2016_2025.md | Findings from the executed extract, with coverage limits |
+| docs/weeks3_4_progress.md | Weeks 3–4 validation. Not rewritten by the later progress note |
+| docs/weeks5_6_progress.md | Weeks 5–6 implementation, tests, and remaining work |
 
 The research documents are contributed independently in [PR #6](https://github.com/mmauricioj28/Reveal-SEEDS/pull/6);
 merge that PR as well as the engineering stack for the complete documentation set.
@@ -71,8 +90,14 @@ The engineering stack begins at Ayaan's `ayaan/data_exploration` branch; its
 commit ancestry and existing tests are preserved. Harika's variable selection,
 Parquet and annual/monthly exploration scripts are on her branch.
 
-Current validation is controlled synthetic fixtures and official API smoke
-samples, not complete national extracts. Crash counts are vehicle-involvement
-records. OOS totals count violations. Null measurements remain distinct from
-zero; no observed record does not prove no event. Current census attributes are
-not historical exposure. See the guides before interpreting linked comparisons.
+Crash file rows are vehicle involvements. This pipeline keeps one row per
+`CRASH_ID`, so a multi-vehicle crash is not counted once for every vehicle.
+OOS totals count violations. Null measurements remain distinct from zero; no
+observed record does not prove no event. Current census attributes are not
+historical exposure. Unmatched percentages use records with a usable DOT number
+as the denominator and do not fold in missing or invalid DOT numbers. See the
+guides before interpreting linked comparisons. The Weeks 5–6 run receipt is
+[docs/full_dataset_validation.md](docs/full_dataset_validation.md). In that run,
+crash records cover every month from 2016-01 through 2025-12. The inspection
+extract’s earliest retained date is 2023-10-30, so earlier inspection months
+are unobserved rather than zero.
