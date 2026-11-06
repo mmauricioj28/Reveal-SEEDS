@@ -1,12 +1,16 @@
 
+
 # Python cache
 __pycache__/
 *.pyc
 
 # Raw datasets
 *.csv
+*.parquet
 
 # Generated analysis reports
 analysis/outputs/
 
-*.parquet
+# DuckDB database files
+*.duckdb
+*.duckdb.wal
