@@ -1,0 +1,63 @@
+[1] Loaded 4,526,631 raw census rows from 21 files
+  rows in the API right now: 4,526,631  -> difference +0 (non-zero if the census was updated after the download)
+
+[2] Clean + type
+  rows with missing/invalid dot_number dropped: 0
+  duplicate dot_number rows dropped (first kept): 0
+  add_date             blank:         0  invalid or future -> NA: 0
+  mcs150_date          blank:   600,888  invalid or future -> NA: 0
+  safety_rating_date   blank: 4,290,011  invalid or future -> NA: 0
+  review_date          blank: 4,286,466  invalid or future -> NA: 0
+  most common add_date values: 1974-06-01 (122,636), 2015-06-12 (75,923), 2011-11-19 (38,314), 2015-07-01 (27,235), 2015-06-30 (23,129)
+  add_date = 1974-06-01 (legacy placeholder, flagged add_date_is_legacy): 122,636 (2.7%)
+  total_cdl: 14 non-numeric/negative/fractional values -> NA
+  total_intrastate_drivers: 2 non-numeric/negative/fractional values -> NA
+  interstate_beyond_100_miles: 1 non-numeric/negative/fractional values -> NA
+  intrastate_within_100_miles: 2 non-numeric/negative/fractional values -> NA
+  mcs150_mileage_year 0/blank/out of range -> NA: 1,982,518 (45.7%)
+  mcs150_mileage = 0 with no mileage year (not reported) -> NA: 1,985,899
+  power_units outside the FLEETSIZE code's range: 243 (flagged power_units_matches_fleetsize = FALSE)
+  largest power_units values: [2699990, 2099979, 1619592, 1400033, 1199989]
+  physical country: {'US': 4431290, 'CA': 67641, 'MX': 27263, 'GT': 245, 'SV': 38, 'HN': 37}
+  US records whose county FIPS doesn't match a Census county: 1,627 -> kept, flagged phy_county_fips_valid
+
+[3] Child tables
+  entities with no cargo type listed: 328,119
+  'OTHER-...' classdef variants mapped to L (Other): 18,991
+
+[4] Rollups
+  US records with no physical state (left out of the state rollups): 2
+  agg_census_state: 62 states | agg_census_added_month: 27,790 state-months
+
+[5] Sanity checks
+  OK   dot_number unique
+  OK   no NULL dot_number
+  OK   every cargo row has a census carrier
+  OK   every classification row has a census carrier
+  OK   no negative counts
+  INFO truck_units + bus_units <= power_units (where all known and consistent): 27 rows exceed
+  INFO total_cdl <= total_drivers: 7,208 rows exceed
+  status mix: {'I': 2280778, 'A': 2244474, 'P': 1379}
+  active carriers (status A and entity type C): 2,132,672
+
+[6] Linkage to the crash data (crash_vehicle.dot_number -> census_carrier)
+  crash vehicles with a USDOT number found in the census: 98.48% (25,890 not found)
+  distinct crash carriers found in the census: 99.83%
+
+[7] Writing parquet
+  wrote census_carrier            4,526,631 rows   55 cols
+  wrote census_cargo             12,874,614 rows    2 cols
+  wrote census_classification     4,848,412 rows    2 cols
+  wrote agg_census_state                 62 rows    8 cols
+  wrote agg_census_added_month       27,790 rows    5 cols
+  wrote dim_status                        3 rows    2 cols
+  wrote dim_carrier_operation             3 rows    2 cols
+  wrote dim_safety_rating                 3 rows    2 cols
+  wrote dim_review_type                  12 rows    2 cols
+  wrote dim_business_org                  3 rows    2 cols
+  wrote dim_entity_type                   7 rows    2 cols
+  wrote dim_fleetsize                    27 rows    3 cols
+  wrote dim_classification               12 rows    2 cols
+  wrote dim_cargo                        30 rows    2 cols
+  wrote dim_state                        57 rows    4 cols
+  wrote dim_county                    3,235 rows    5 cols
