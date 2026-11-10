@@ -1,0 +1,25 @@
+{
+    "workbench.editorAssociations": {
+        "*.copilotmd": "vscode.markdown.preview.editor",
+        "*.db": "default",
+        "*.parquet": "duckdb.dataFileViewer",
+        "*.csv": "duckdb.dataFileViewer",
+        "*.tsv": "duckdb.dataFileViewer",
+        "*.xlsx": "duckdb.dataFileViewer"
+    },
+    "duckdb.databases": [
+        {
+            "alias": "crash",
+            "type": "file",
+            "path": "c:\\Users\\mmaur\\Documents\\Git\\Reveal-SEEDS\\SQL\\crash.duckdb",
+            "attached": true
+        },
+        {
+            "alias": "census",
+            "type": "file",
+            "path": "c:\\Users\\mmaur\\Documents\\Git\\Reveal-SEEDS\\SQL\\census.duckdb",
+            "attached": true
+        }
+    ],
+    "duckdb.defaultDatabase": "census"
+}
