@@ -103,7 +103,7 @@ Reveal-SEEDS/
 - **Census is a snapshot:** fleet size, drivers and status are today's values, not historical ones.
   `add_date` is when a record was created *or reactivated/updated*, so it is not a clean first-registration date.
 - **Recent data is incomplete:** 2026 is a partial year and late reports keep arriving for the latest months.
-  The team's analysis period is 2016–2025.
+  The team's analysis period is 2015–2025.
 - About 21% of crash vehicles have no USDOT number, so they can't be joined to the census.
 
 ## Company Census processing (analysis module)
