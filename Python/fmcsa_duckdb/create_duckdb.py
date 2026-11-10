@@ -7,7 +7,8 @@ BASE = Path(
 ).resolve()
 
 SOURCE = BASE / "outputs" / "full_integration_20261024"
-DB_PATH = BASE / "fmcsa.duckdb"tables = {
+DB_PATH = BASE / "fmcsa.duckdb"
+tables = {
     "carriers": "carriers.parquet",
     "carrier_safety_2016_2025": "carrier_safety_2016_2025.parquet",
     "crash_carrier_year": "crash_carrier_year.parquet",

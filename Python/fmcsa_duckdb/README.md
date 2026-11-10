@@ -57,7 +57,7 @@ All implemented validation checks passed for the October 24 snapshot.
 
 ### create_views.py
 
-Creates six SQL views for research analysis and dashboard development.
+Creates eight SQL views for research analysis and dashboard development.
 
 ## Dashboard SQL Views
 
@@ -183,7 +183,7 @@ Required files:
 From the repository root, run:
 
 ```cmd
-python scripts\fmcsa_duckdb\create_duckdb.py
+python Python\fmcsa_duckdb\create_duckdb.py
 ```
 
 The script creates `fmcsa.duckdb` in the configured data directory.
@@ -191,7 +191,7 @@ The script creates `fmcsa.duckdb` in the configured data directory.
 ### 4. Validate the Database
 
 ```cmd
-python scripts\fmcsa_duckdb\validate_duckdb.py
+python Python\fmcsa_duckdb\validate_duckdb.py
 ```
 
 Successful execution should end with:
@@ -203,10 +203,10 @@ ALL DATABASE VALIDATION CHECKS PASSED
 ### 5. Create Dashboard Views
 
 ```cmd
-python scripts\fmcsa_duckdb\create_views.py
+python Python\fmcsa_duckdb\create_views.py
 ```
 
-This creates six SQL views and displays row counts, source labels, and selected record totals.
+This creates eight SQL views and displays row counts, source labels, and selected record totals.
 
 ## Tableau Integration
 
@@ -221,7 +221,7 @@ Potential visualizations include:
 
 These visualizations should distinguish retained event counts from carrier-linked or Census-matched counts.
 
-Tableau integration and published dashboards are not included in this module.
+Run `python Python\fmcsa_duckdb\export_tableau.py` to write the three crash trend CSVs under `%FMCSA_DATA_DIR%\tableau_exports`. Open them as text data sources in Tableau.
 
 ## Data Limitations
 
