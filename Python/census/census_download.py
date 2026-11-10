@@ -2,10 +2,10 @@
 straight into Parquet (no CSV is ever written to disk).
 
 The census is one row per USDOT number (~4.5M entities). It is split by DOT number range into
-FMCSA_data_raw/census_parquet/census_<start>.parquet (about 250k rows each) so a failed chunk can be
+data/raw/census/census_<start>.parquet (about 250k rows each) so a failed chunk can be
 re-run alone; chunks that already exist are skipped. Every column is kept as text here - typing and
 cleaning happen in census_build_parquet.py.
-Run from the repo root:  python Python/census_download.py
+Run:  python Python/census/census_download.py
 """
 import io
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -17,7 +17,8 @@ import pyarrow.parquet as pq
 import requests
 
 URL_CENSUS = "https://data.transportation.gov/resource/az4n-8mr2.csv"
-OUT_DIR = Path("FMCSA_data_raw") / "census_parquet"
+ROOT = Path(__file__).resolve().parents[2]  # Python/<group>/<script>.py -> repo root
+OUT_DIR = ROOT / "data" / "raw" / "census"
 
 WORKERS = 6        # chunks downloaded at once
 CHUNK = 250_000    # DOT numbers per chunk; numbers are dense below ~4.6M

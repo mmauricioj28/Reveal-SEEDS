@@ -1,11 +1,11 @@
 """Step 2 of the Census pipeline: clean the raw Company Census chunks and split them into relational Parquet tables.
 
-Input : FMCSA_data_raw/census_parquet/census_*.parquet  (from census_download.py)
+Input : data/raw/census/census_*.parquet  (from census_download.py)
         Census 2020 county FIPS list (read from census.gov, used for dim_state / dim_county)
-        FMCSA_data_processed/crash/crash_vehicle.parquet  (optional - only for the crash linkage check)
-Output: FMCSA_data_processed/census/*.parquet  + _build_report.txt
+        data/processed/crash/crash_vehicle.parquet  (optional - only for the crash linkage check)
+Output: data/processed/census/*.parquet  + _build_report.txt
 
-Run from the repo root:  python Python/census_build_parquet.py
+Run:  python Python/census/census_build_parquet.py
 
 Grain: ONE ROW PER USDOT NUMBER (registered entity: carriers, shippers, brokers, ...).
 The census is a SNAPSHOT of each entity as it is today - fleet size, drivers and status are current
@@ -27,10 +27,11 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-RAW_DIR = Path("FMCSA_data_raw") / "census_parquet"
+ROOT = Path(__file__).resolve().parents[2]  # Python/<group>/<script>.py -> repo root
+RAW_DIR = ROOT / "data" / "raw" / "census"
 COUNTY_URL = "https://www2.census.gov/geo/docs/reference/codes2020/national_county2020.txt"
-CRASH_VEHICLE = Path("FMCSA_data_processed") / "crash" / "crash_vehicle.parquet"
-OUT_DIR = Path("FMCSA_data_processed") / "census"
+CRASH_VEHICLE = ROOT / "data" / "processed" / "crash" / "crash_vehicle.parquet"
+OUT_DIR = ROOT / "data" / "processed" / "census"
 API_COUNT = "https://data.transportation.gov/resource/az4n-8mr2.json?$select=count(*)"
 TODAY = pd.Timestamp(date.today())
 
@@ -131,7 +132,7 @@ def check_codes(df, col, allowed):
 def load_raw():
     files = sorted(RAW_DIR.glob("census_*.parquet"))
     if not files:
-        raise SystemExit(f"No parquet files in {RAW_DIR} - run Python/census_download.py first")
+        raise SystemExit(f"No parquet files in {RAW_DIR} - run Python/census/census_download.py first")
     df = pd.concat((pd.read_parquet(f).astype(STR) for f in files), ignore_index=True)
     for c in df.columns:  # trim + blank -> NA
         df[c] = df[c].str.strip().replace("", pd.NA)
