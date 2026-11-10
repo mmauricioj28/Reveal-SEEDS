@@ -13,7 +13,4 @@
             "type": "file",
             "path": "c:\\Users\\mmaur\\Documents\\Git\\Reveal-SEEDS\\SQL\\crash.duckdb",
             "attached": true
-        }
-    ],
-    "duckdb.defaultDatabase": "crash"
 }
