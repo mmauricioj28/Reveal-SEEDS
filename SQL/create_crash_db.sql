@@ -1,5 +1,5 @@
--- Crash DB: tables + keys, loaded from the processed parquets (FMCSA_data_processed/crash/, built by crash_build_parquet.py)
--- Paths are relative to the repo root. Run with: python SQL/build_crash_db.py  (it rebuilds the .duckdb from scratch)
+-- Crash DB: tables + keys, loaded from the processed parquets (data/processed/crash/, built by crash_build_parquet.py)
+-- Paths are relative to the repo root. Run with: python Python/database/build_crash_db.py  (it rebuilds the .duckdb from scratch)
 --
 -- Keys
 --   crash          PK crash_key                          (= report_number + '_' + report_date)
@@ -175,27 +175,27 @@ CREATE TABLE agg_state_month (
 );
 
 -- ================================================================ load data (BY NAME matches parquet columns to table columns)
-INSERT INTO dim_state              BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_state.parquet');
-INSERT INTO dim_county             BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_county.parquet');
-INSERT INTO dim_trafficway         BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_trafficway.parquet');
-INSERT INTO dim_access_control     BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_access_control.parquet');
-INSERT INTO dim_road_surface       BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_road_surface.parquet');
-INSERT INTO dim_weather            BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_weather.parquet');
-INSERT INTO dim_light              BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_light.parquet');
-INSERT INTO dim_cargo_body         BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_cargo_body.parquet');
-INSERT INTO dim_gvw_rating         BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_gvw_rating.parquet');
-INSERT INTO dim_vehicle_config     BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_vehicle_config.parquet');
-INSERT INTO dim_event              BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_event.parquet');
-INSERT INTO dim_ci_status          BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_ci_status.parquet');
-INSERT INTO dim_carrier_interstate BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_carrier_interstate.parquet');
-INSERT INTO dim_truck_bus          BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/dim_truck_bus.parquet');
+INSERT INTO dim_state              BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_state.parquet');
+INSERT INTO dim_county             BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_county.parquet');
+INSERT INTO dim_trafficway         BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_trafficway.parquet');
+INSERT INTO dim_access_control     BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_access_control.parquet');
+INSERT INTO dim_road_surface       BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_road_surface.parquet');
+INSERT INTO dim_weather            BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_weather.parquet');
+INSERT INTO dim_light              BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_light.parquet');
+INSERT INTO dim_cargo_body         BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_cargo_body.parquet');
+INSERT INTO dim_gvw_rating         BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_gvw_rating.parquet');
+INSERT INTO dim_vehicle_config     BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_vehicle_config.parquet');
+INSERT INTO dim_event              BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_event.parquet');
+INSERT INTO dim_ci_status          BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_ci_status.parquet');
+INSERT INTO dim_carrier_interstate BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_carrier_interstate.parquet');
+INSERT INTO dim_truck_bus          BY NAME SELECT * FROM read_parquet('data/processed/crash/dim_truck_bus.parquet');
 
-INSERT INTO crash                  BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/crash.parquet');
-INSERT INTO crash_vehicle          BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/crash_vehicle.parquet');
-INSERT INTO crash_carrier          BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/crash_carrier.parquet');
+INSERT INTO crash                  BY NAME SELECT * FROM read_parquet('data/processed/crash/crash.parquet');
+INSERT INTO crash_vehicle          BY NAME SELECT * FROM read_parquet('data/processed/crash/crash_vehicle.parquet');
+INSERT INTO crash_carrier          BY NAME SELECT * FROM read_parquet('data/processed/crash/crash_carrier.parquet');
 -- 9 event rows are empty (blank event text in the source) -> skipped, they can't satisfy the primary key
-INSERT INTO crash_event            BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/crash_event.parquet')
+INSERT INTO crash_event            BY NAME SELECT * FROM read_parquet('data/processed/crash/crash_event.parquet')
                                            WHERE event_seq IS NOT NULL;
 
-INSERT INTO agg_state_year         BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/agg_state_year.parquet');
-INSERT INTO agg_state_month        BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/crash/agg_state_month.parquet');
+INSERT INTO agg_state_year         BY NAME SELECT * FROM read_parquet('data/processed/crash/agg_state_year.parquet');
+INSERT INTO agg_state_month        BY NAME SELECT * FROM read_parquet('data/processed/crash/agg_state_month.parquet');

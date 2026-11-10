@@ -1,10 +1,10 @@
 """Step 1 of the Crash pipeline: pull the FMCSA Crash File (2015+) from data.transportation.gov
 straight into Parquet (no CSV is ever written to disk).
 
-One raw Parquet per crash year is written to FMCSA_data_raw/crash_parquet/ so a failed year can be
+One raw Parquet per crash year is written to data/raw/crash/ so a failed year can be
 re-run alone; years that already exist are skipped. Every column is kept as text here - typing and
 cleaning happen in crash_build_parquet.py.
-Run from the repo root:  python Python/crash_download.py  [first_year] [last_year]
+Run:  python Python/crash/crash_download.py  [first_year] [last_year]
 """
 import io
 import sys
@@ -18,7 +18,8 @@ import pyarrow.parquet as pq
 import requests
 
 URL_CRASH = "https://data.transportation.gov/resource/aayw-vxb3.csv"
-OUT_DIR = Path("FMCSA_data_raw") / "crash_parquet"
+ROOT = Path(__file__).resolve().parents[2]  # Python/<group>/<script>.py -> repo root
+OUT_DIR = ROOT / "data" / "raw" / "crash"
 
 FIRST_YEAR = int(sys.argv[1]) if len(sys.argv) > 1 else 2015
 LAST_YEAR = int(sys.argv[2]) if len(sys.argv) > 2 else date.today().year

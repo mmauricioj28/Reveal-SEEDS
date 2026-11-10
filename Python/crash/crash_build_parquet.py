@@ -1,10 +1,10 @@
 """Step 2 of the Crash pipeline: clean the raw Crash CSVs and split them into relational Parquet tables.
 
-Input : FMCSA_data_raw/crash_parquet/crash_*.parquet  (from crash_download.py)
+Input : data/raw/crash/crash_*.parquet  (from crash_download.py)
         Census 2020 county FIPS list (read from census.gov, used for dim_state / dim_county)
-Output: FMCSA_data_processed/crash/*.parquet  + _build_report.txt
+Output: data/processed/crash/*.parquet  + _build_report.txt
 
-Run from the repo root:  python Python/crash_build_parquet.py
+Run:  python Python/crash/crash_build_parquet.py
 
 Grain of the raw file: ONE ROW PER COMMERCIAL MOTOR VEHICLE (CMV) IN A CRASH.
   crash_id       -> unique per row (vehicle-in-crash record)
@@ -12,7 +12,7 @@ Grain of the raw file: ONE ROW PER COMMERCIAL MOTOR VEHICLE (CMV) IN A CRASH.
 Crash-level fields (date, location, weather, fatalities, injuries...) are repeated on every
 vehicle row, so summing fatalities over raw rows double counts multi-CMV crashes.
 
-Tables written (see sql/crash_schema.sql for keys):
+Tables written (see SQL/create_crash_db.sql for keys):
   crash            1 row per crash (crash_key)             -> counts, severity, conditions, place, time
   crash_vehicle    1 row per CMV in a crash (crash_id)     -> vehicle type, cargo body, hazmat, carrier DOT#
   crash_carrier    1 row per CMV in a crash (crash_id)     -> carrier as written on the crash report
@@ -26,9 +26,10 @@ from pathlib import Path
 
 import pandas as pd
 
-RAW_DIR = Path("FMCSA_data_raw") / "crash_parquet"
+ROOT = Path(__file__).resolve().parents[2]  # Python/<group>/<script>.py -> repo root
+RAW_DIR = ROOT / "data" / "raw" / "crash"
 COUNTY_URL = "https://www2.census.gov/geo/docs/reference/codes2020/national_county2020.txt"
-OUT_DIR = Path("FMCSA_data_processed") / "crash"
+OUT_DIR = ROOT / "data" / "processed" / "crash"
 MIN_DATE = pd.Timestamp("2015-01-01")
 MAX_DATE = pd.Timestamp(date.today())
 
@@ -130,7 +131,7 @@ def to_ts(s, fmt):
 def load_raw():
     files = sorted(RAW_DIR.glob("crash_*.parquet"))
     if not files:
-        raise SystemExit(f"No parquet files in {RAW_DIR} - run Python/crash_download.py first")
+        raise SystemExit(f"No parquet files in {RAW_DIR} - run Python/crash/crash_download.py first")
     df = pd.concat((pd.read_parquet(f).astype(STR) for f in files), ignore_index=True)
     for c in df.columns:  # trim + blank -> NA
         df[c] = df[c].str.strip().replace("", pd.NA)

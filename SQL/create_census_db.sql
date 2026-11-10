@@ -1,6 +1,6 @@
 -- Census DB: FMCSA Company Census (MCMIS) tables + keys, loaded from the processed parquets
--- (FMCSA_data_processed/census/, built by census_build_parquet.py).
--- Paths are relative to the repo root. Run with: python SQL/build_census_db.py  (it rebuilds the .duckdb from scratch)
+-- (data/processed/census/, built by census_build_parquet.py).
+-- Paths are relative to the repo root. Run with: python Python/database/build_census_db.py  (it rebuilds the .duckdb from scratch)
 --
 -- Keys
 --   census_carrier         PK dot_number                 (one row per USDOT number - a SNAPSHOT of today)
@@ -139,21 +139,21 @@ CREATE TABLE agg_census_added_month (
 );
 
 -- ================================================================ load data (BY NAME matches parquet columns to table columns)
-INSERT INTO dim_state              BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/dim_state.parquet');
-INSERT INTO dim_county             BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/dim_county.parquet');
-INSERT INTO dim_status             BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/dim_status.parquet');
-INSERT INTO dim_carrier_operation  BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/dim_carrier_operation.parquet');
-INSERT INTO dim_safety_rating      BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/dim_safety_rating.parquet');
-INSERT INTO dim_review_type        BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/dim_review_type.parquet');
-INSERT INTO dim_business_org       BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/dim_business_org.parquet');
-INSERT INTO dim_entity_type        BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/dim_entity_type.parquet');
-INSERT INTO dim_classification     BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/dim_classification.parquet');
-INSERT INTO dim_cargo              BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/dim_cargo.parquet');
-INSERT INTO dim_fleetsize          BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/dim_fleetsize.parquet');
+INSERT INTO dim_state              BY NAME SELECT * FROM read_parquet('data/processed/census/dim_state.parquet');
+INSERT INTO dim_county             BY NAME SELECT * FROM read_parquet('data/processed/census/dim_county.parquet');
+INSERT INTO dim_status             BY NAME SELECT * FROM read_parquet('data/processed/census/dim_status.parquet');
+INSERT INTO dim_carrier_operation  BY NAME SELECT * FROM read_parquet('data/processed/census/dim_carrier_operation.parquet');
+INSERT INTO dim_safety_rating      BY NAME SELECT * FROM read_parquet('data/processed/census/dim_safety_rating.parquet');
+INSERT INTO dim_review_type        BY NAME SELECT * FROM read_parquet('data/processed/census/dim_review_type.parquet');
+INSERT INTO dim_business_org       BY NAME SELECT * FROM read_parquet('data/processed/census/dim_business_org.parquet');
+INSERT INTO dim_entity_type        BY NAME SELECT * FROM read_parquet('data/processed/census/dim_entity_type.parquet');
+INSERT INTO dim_classification     BY NAME SELECT * FROM read_parquet('data/processed/census/dim_classification.parquet');
+INSERT INTO dim_cargo              BY NAME SELECT * FROM read_parquet('data/processed/census/dim_cargo.parquet');
+INSERT INTO dim_fleetsize          BY NAME SELECT * FROM read_parquet('data/processed/census/dim_fleetsize.parquet');
 
-INSERT INTO census_carrier         BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/census_carrier.parquet');
-INSERT INTO census_cargo           BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/census_cargo.parquet');
-INSERT INTO census_classification  BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/census_classification.parquet');
+INSERT INTO census_carrier         BY NAME SELECT * FROM read_parquet('data/processed/census/census_carrier.parquet');
+INSERT INTO census_cargo           BY NAME SELECT * FROM read_parquet('data/processed/census/census_cargo.parquet');
+INSERT INTO census_classification  BY NAME SELECT * FROM read_parquet('data/processed/census/census_classification.parquet');
 
-INSERT INTO agg_census_state       BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/agg_census_state.parquet');
-INSERT INTO agg_census_added_month BY NAME SELECT * FROM read_parquet('FMCSA_data_processed/census/agg_census_added_month.parquet');
+INSERT INTO agg_census_state       BY NAME SELECT * FROM read_parquet('data/processed/census/agg_census_state.parquet');
+INSERT INTO agg_census_added_month BY NAME SELECT * FROM read_parquet('data/processed/census/agg_census_added_month.parquet');

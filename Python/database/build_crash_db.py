@@ -1,21 +1,21 @@
 """
-Run from the repo root:  python SQL/build_census_db.py
+Run:  python Python/database/build_crash_db.py
 Then query it from Python:
     import duckdb
-    con = duckdb.connect("SQL/census.duckdb")
-    con.sql("SELECT phy_state, active_carriers FROM agg_census_state ORDER BY 2 DESC").show()
-Use it alongside the crash DB (one connection, join on dot_number):
-    con = duckdb.connect("SQL/crash.duckdb", read_only=True)
-    con.execute("ATTACH 'SQL/census.duckdb' AS census (READ_ONLY)")
-    con.sql("SELECT ... FROM crash_vehicle v JOIN census.census_carrier c ON c.dot_number = v.dot_number").show()
+    con = duckdb.connect("DB/crash.duckdb")
+    con.sql("SELECT state, SUM(crashes) FROM agg_state_year GROUP BY 1 ORDER BY 2 DESC").show()
 """
+import os
 from pathlib import Path
 
 import duckdb
 
-DB_PATH = Path("SQL") / "census.duckdb"
-SCRIPT = Path("SQL") / "create_census_db.sql"
+ROOT = Path(__file__).resolve().parents[2]  # Python/database/build_crash_db.py -> repo root
+DB_PATH = ROOT / "DB" / "crash.duckdb"
+SCRIPT = ROOT / "SQL" / "create_crash_db.sql"
+os.chdir(ROOT)  # the SQL file's read_parquet() paths are relative to the repo root
 
+DB_PATH.parent.mkdir(exist_ok=True)  # DB/ isn't in git (databases are built locally)
 DB_PATH.unlink(missing_ok=True)  # rebuild from scratch (tables with foreign keys can't simply be replaced)
 # write the file in DuckDB 1.x format so VS Code extensions (which bundle DuckDB 1.5) can open it
 con = duckdb.connect(str(DB_PATH), config={"storage_compatibility_version": "v1.0.0"})

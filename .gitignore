@@ -14,3 +14,6 @@ analysis/outputs/
 # DuckDB database files
 *.duckdb
 *.duckdb.wal
+
+# Personal VS Code settings (local paths, attached databases)
+.vscode/settings.json
