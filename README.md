@@ -73,6 +73,8 @@ Open the databases **read-only** when querying: a normal connection locks the fi
 
 ## Repository layout
 
+For the interactive crash and inspection explorer, follow the [dashboard quickstart](docs/dashboard/README.md). It reads a reviewed three-source integration run and produces local browser and Tableau extracts.
+
 ```
 Reveal-SEEDS/
 ├── data/                         all data (Parquet in Git LFS)

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Motor carrier activity · Reveal SEEDS</title>
+  <link rel="stylesheet" href="dashboard.css">
+  <script src="dashboard.js" defer></script>
+</head>
+<body>
+  <header><div class="wrap mast"><span>Reveal SEEDS</span><span>FMCSA research</span></div></header>
+  <main class="wrap">
+    <h1>Motor carrier activity</h1>
+    <p id="snapshot" class="sub" role="status">Loading the local snapshot…</p>
+    <noscript>Enable JavaScript to explore the dashboard.</noscript>
+    <div id="explorer" hidden>
+      <nav aria-label="Dashboard views">
+        <button type="button" data-view="trends" aria-pressed="true">Activity trends</button>
+        <button type="button" data-view="geography" aria-pressed="false">Geography</button>
+        <button type="button" data-view="carriers" aria-pressed="false">Carrier characteristics</button>
+      </nav>
+      <form id="controls" aria-label="Chart filters">
+        <label>Records<select id="source"><option value="crash">Crash</option><option value="inspection">Inspection</option></select></label>
+        <label>From year<select id="first"></select></label>
+        <label>Through year<select id="last"></select></label>
+        <label id="region"><span id="regionLabel">Crash location</span><select id="state"></select></label>
+        <label id="trendControl">Time grouping<select id="grouping"><option value="annual">Annual</option><option value="monthly">Monthly</option><option value="seasonal">Calendar month</option></select></label>
+        <label id="carrierControl" hidden>Compare by<select id="dimension"><option value="fleet">Power units</option><option value="operation">Carrier operation</option></select></label>
+        <label id="categoryControl" hidden>Carrier group<select id="category"></select></label>
+      </form>
+      <div class="metrics" aria-live="polite">
+        <div><span id="metricLabel"></span><strong id="recordCount"></strong></div>
+        <div><span id="monthsLabel">Months with records</span><strong id="monthsSeen"></strong></div>
+        <div><span id="qualityLabel"></span><strong id="qualityValue"></strong></div>
+      </div>
+      <section class="panel" aria-labelledby="figureTitle">
+        <h2 id="figureTitle"></h2><p id="figureNote" class="sub"></p>
+        <div id="chart"></div>
+        <p id="coverage" class="note"></p>
+        <details><summary>View chart data</summary><div class="table-scroll"><table id="rows"></table></div></details>
+      </section>
+      <details class="methods"><summary>Source and definitions</summary>
+        <p id="dates"></p>
+        <p>Export fingerprint <code id="fingerprint"></code></p>
+        <p>Crash counts refer to retained crash records. Inspection counts refer to inspection records. Event frequency describes the extract and does not measure risk per trip or mile.</p>
+        <p>A matched record has a usable USDOT number found in the Census extract. An unmatched record has a usable number absent from that extract. An unidentified record lacks a usable number.</p>
+        <p>Crash geography uses the reported crash location. Inspection geography uses the reporting jurisdiction. The carrier views use Census attributes from the snapshot, including for events in earlier years.</p>
+        <p>Full snapshot CSV files for Tableau · <a href="data/activity.csv" download>Activity</a> · <a href="data/calendar.csv" download>Coverage calendar</a> · <a href="data/carriers.csv" download>Carrier groups</a></p>
+      </details>
+    </div>
+  </main>
+</body>
+</html>
