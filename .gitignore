@@ -12,6 +12,7 @@ __pycache__/
 analysis/outputs/
 
 # DuckDB database files
+/dashboard/data/
 *.duckdb
 *.duckdb.wal
 
